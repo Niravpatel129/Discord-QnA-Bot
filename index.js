@@ -18,12 +18,10 @@ const handleQuestion = (message) => {
 
   guild.channels
     .create({
-      name: 'Question Asked by ' + message.author.username,
+      name: 'Question -' + message.author.username,
       type: ChannelType.GuildText,
       parent: message.channel.parent,
       permissionOverwrites: [
-        // allow everyone else to not view the channel
-
         {
           id: specificRoleId,
           allow: [PermissionsBitField.Flags.ViewChannel],
