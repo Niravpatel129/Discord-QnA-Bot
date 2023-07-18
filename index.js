@@ -11,15 +11,8 @@ const client = new Client({
   ],
 });
 
-client.once('ready', () => {
-  console.log('Bot is ready!');
-});
-
-client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
-  if (message.channel.name !== 'submit-question') return;
-
-  // Create the "test" channel
+// Submit Question Channel
+const handleQuestion = (message) => {
   const guild = message.guild;
   const specificRoleId = '1076368009649721438';
 
@@ -60,6 +53,18 @@ client.on('messageCreate', async (message) => {
     .catch((error) => {
       console.error('Error creating a new channel:', error);
     });
+};
+
+client.once('ready', () => {
+  console.log('Bot is ready!');
+});
+
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+  if (message.channel.name === 'submit-question') {
+    handleQuestion(message);
+    return;
+  }
 
   console.log('🚀  message.content:', message.content);
 });
