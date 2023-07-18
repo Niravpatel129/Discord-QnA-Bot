@@ -59,12 +59,30 @@ const handleQuestion = (message) => {
     });
 };
 
-const handleRejectQuestion = (message, { reason }) => {
+const handleRejectQuestion = (message, { user, reason }) => {
   message.channel.send(' ❌ Question rejected by <@' + message.author.id + '>, reason: ' + reason);
+  const channelId = '1130980204005818408';
+  const channel = client.channels.cache.get(channelId);
+
+  const userWhoAsked = channel.members.find(
+    (member) => member.user.username === message.channel.name.split('-')[1],
+  );
+
+  userWhoAsked.send(' ❌ Question rejected by <@' + message.author.id + '>, reason: ' + reason);
 };
 
 const handleAnswerQuestion = (message, { answer }) => {
+  const channelId = '1130980204005818408';
+  const channel = client.channels.cache.get(channelId);
+
+  const userWhoAsked = channel.members.find(
+    (member) => member.user.username === message.channel.name.split('-')[1],
+  );
+
+  userWhoAsked.send(' ✅ Question answered by <@' + message.author.id + '>, answer: ' + answer);
+
   message.channel.send(' ✅ Question answered by <@' + message.author.id + '>, answer: ' + answer);
+
   addQuestionToGlobalChannel({ message: answer, askedBy: message.channel.name.split('-')[1] });
 };
 
