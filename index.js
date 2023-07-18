@@ -1,4 +1,10 @@
-import { ChannelType, Client, GatewayIntentBits, PermissionsBitField } from 'discord.js';
+import {
+  ChannelType,
+  Client,
+  EmbedBuilder,
+  GatewayIntentBits,
+  PermissionsBitField,
+} from 'discord.js';
 import { config } from 'dotenv';
 config();
 
@@ -18,7 +24,7 @@ const handleQuestion = (message) => {
 
   guild.channels
     .create({
-      name: 'Question -' + message.author.username,
+      name: 'Question-' + message.author.username,
       type: ChannelType.GuildText,
       parent: message.channel.parent,
       permissionOverwrites: [
@@ -53,6 +59,38 @@ const handleQuestion = (message) => {
     });
 };
 
+const handleRejectQuestion = (message, { reason }) => {
+  message.channel.send(' ❌ Question rejected by <@' + message.author.id + '>, reason: ' + reason);
+};
+
+const handleAnswerQuestion = (message, { answer }) => {
+  message.channel.send(' ✅ Question answered by <@' + message.author.id + '>, answer: ' + answer);
+  addQuestionToGlobalChannel({ message: answer, askedBy: message.channel.name.split('-')[1] });
+};
+
+const addQuestionToGlobalChannel = ({ message, askedBy }) => {
+  const channelId = '1130980204005818408';
+  const channel = client.channels.cache.get(channelId);
+
+  const user = channel.members.find((member) => member.user.username === askedBy);
+  console.log('🚀  user:', user.user.avatar);
+  const avatar =
+    'https://cdn.discordapp.com/avatars/' + user.user.id + '/' + user.user.avatar + '.jpeg';
+
+  const exampleEmbed = new EmbedBuilder()
+    .setColor(0x0099ff)
+    .setTitle('Asked Question')
+    .setAuthor({
+      name: askedBy || 'Author',
+      iconURL: avatar,
+    })
+    .setDescription(message || 'error')
+    .setTimestamp()
+    .setFooter({ text: 'Qquestion #1212' });
+
+  channel.send({ embeds: [exampleEmbed] });
+};
+
 client.once('ready', () => {
   console.log('Bot is ready!');
 });
@@ -61,6 +99,27 @@ client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (message.channel.name === 'submit-question') {
     handleQuestion(message);
+    return;
+  }
+
+  if (message.channel.name.split('-')[0] === 'question') {
+    // A user can reject a message by the following command:
+    // !reject sorry this question is not relevant
+    if (message.content.startsWith('!reject')) {
+      handleRejectQuestion(message, {
+        reason: message.content.split(' ').slice(1).join(' '),
+      });
+      return;
+    }
+
+    // A user can answer a question by the following command:
+    // !answer this is the answer
+    if (message.content.startsWith('!answer')) {
+      handleAnswerQuestion(message, {
+        answer: message.content.split(' ').slice(1).join(' '),
+      });
+      return;
+    }
     return;
   }
 
