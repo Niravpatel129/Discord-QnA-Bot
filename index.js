@@ -27,6 +27,7 @@ const handleQuestion = (message) => {
       name: 'Question-' + message.author.username,
       type: ChannelType.GuildText,
       parent: message.channel.parent,
+      topic: message.content,
       permissionOverwrites: [
         {
           id: specificRoleId,
@@ -71,7 +72,7 @@ const handleRejectQuestion = (message, { user, reason }) => {
   userWhoAsked.send(' ❌ Question rejected by <@' + message.author.id + '>, reason: ' + reason);
 };
 
-const handleAnswerQuestion = (message, { answer }) => {
+const handleAnswerQuestion = (message, { answer, question }) => {
   const channelId = '1130980204005818408';
   const channel = client.channels.cache.get(channelId);
 
@@ -83,10 +84,14 @@ const handleAnswerQuestion = (message, { answer }) => {
 
   message.channel.send(' ✅ Question answered by <@' + message.author.id + '>, answer: ' + answer);
 
-  addQuestionToGlobalChannel({ message: answer, askedBy: message.channel.name.split('-')[1] });
+  addQuestionToGlobalChannel({
+    message: answer,
+    askedBy: message.channel.name.split('-')[1],
+    question,
+  });
 };
 
-const addQuestionToGlobalChannel = ({ message, askedBy }) => {
+const addQuestionToGlobalChannel = ({ message, askedBy, question }) => {
   const channelId = '1130980204005818408';
   const channel = client.channels.cache.get(channelId);
 
@@ -102,7 +107,7 @@ const addQuestionToGlobalChannel = ({ message, askedBy }) => {
       name: askedBy || 'Author',
       iconURL: avatar,
     })
-    .setDescription(message || 'error')
+    .setDescription(question || 'error')
     .setTimestamp()
     .setFooter({ text: 'Qquestion #1212' });
 
@@ -135,6 +140,7 @@ client.on('messageCreate', async (message) => {
     if (message.content.startsWith('!answer')) {
       handleAnswerQuestion(message, {
         answer: message.content.split(' ').slice(1).join(' '),
+        question: message.channel.topic,
       });
       return;
     }
