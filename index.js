@@ -17,6 +17,13 @@ const client = new Client({
   ],
 });
 
+const handleDeleteChannel = (message) => {
+  message.channel.send('This channel will get deleted in 5 seconds');
+  setTimeout(() => {
+    message.channel.delete();
+  }, 5000);
+};
+
 // Submit Question Channel
 const handleQuestion = (message) => {
   const guild = message.guild;
@@ -132,6 +139,10 @@ client.on('messageCreate', async (message) => {
       handleRejectQuestion(message, {
         reason: message.content.split(' ').slice(1).join(' '),
       });
+
+      // delete channel after 5 seconds
+      handleDeleteChannel(message);
+
       return;
     }
 
@@ -142,6 +153,8 @@ client.on('messageCreate', async (message) => {
         answer: message.content.split(' ').slice(1).join(' '),
         question: message.channel.topic,
       });
+      handleDeleteChannel(message);
+
       return;
     }
     return;
